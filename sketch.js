@@ -60,6 +60,8 @@ function setup()
 function draw()
 {
 
+	// From what I recall, I've wrote all the code aside from the basic code that was already written like the background and the ground. 
+
 	cameraPosX = gameChar_x - width / 2;
 
 	///////////DRAWING CODE//////////
