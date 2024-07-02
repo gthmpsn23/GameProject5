@@ -12,8 +12,13 @@ var collectables;
 var treePos_y;
 var mountain;
 var cameraPosX = 0;
-var numCollectables = 15
+var numCollectables = 15;
 var canyons;
+var game_score;
+
+var flagpole;
+
+var lives;
 
 
 
@@ -43,10 +48,6 @@ function setup()
 		});
 	}
 
-
-	isPlummeting = false;
-
-
 	canyons =[{x_pos: -650, width: 120},
 		{x_pos: -350, width: 120},
 		{x_pos: 150, width: 120},
@@ -62,18 +63,24 @@ function setup()
 	mountain = {width: 110};
 
 
+	game_score = 0
+
+	lives = 3
+
+	flagpole = {isReached: false, x_pos: 1500}
+
+
 }
 
 function draw()
 {
-
+	
 	cameraPosX = gameChar_x - width / 2;
 
 	///////////DRAWING CODE//////////
 
 	background(100,155,255); //fill the sky blue
 
-	
 	noStroke();
 	fill(0,155,0);
 	rect(0, floorPos_y, width, height - floorPos_y); //draw some green ground
@@ -105,19 +112,14 @@ function draw()
 		
 	}
 
-
 	for (var i = 0; i < collectables.length; i++) {
-        var t_collectable = collectables[i]; // Get the current collectable
-        
-        // Check if the collectable has been found
-        checkCollectable(t_collectable);
         
         // Draw the collectable if it has not been found
-        if (!t_collectable.isFound) {
-            drawCollectable(t_collectable);
+        if (!collectables[i].isFound) {
+            drawCollectable(collectables[i]);
+			checkCollectable(collectables[i]);
         }
     }
-
 
 	//the game character
 	if(isLeft && isFalling)
@@ -298,6 +300,19 @@ function draw()
 
 
 	}
+	
+	showScore(game_score)
+
+	renderFlagpole()
+
+
+	
+
+	pop();
+
+	
+
+	
 
 	///////////INTERACTION CODE//////////
 	//Put conditional statements to move the game character below here
@@ -336,27 +351,28 @@ function draw()
 		if(gameChar_y >= floorPos_y && !isJumping)
 		{	isLeft = false
 			isRight = false
-			gameChar_y += 10;
+			gameChar_y += 20;
 			if (gameChar_y > height - 10)
 			{
 				// gameChar_y = height + 10
-				fill(255,0,0);
-				textSize(60);
-				text("You're Dead!", gameChar_x , height/2)
+				// fill(255,0,0);
+				// textSize(60);
+				// text("You're Dead!", cameraPosX, height/2)
 				gameChar_y = height + 10
+				
+
 			}
 		}
 	}
 
-	// if (isPlummeting)
-	// {
-	// 	if(gameChar_y <= height && !isJumping)
-	// 	{
-	// 		gameChar_y += 20;
-	// 	}
-	// }
 
-	pop();
+
+	if(flagpole.isReached == false)
+	{
+	checkFlagpole();
+	}
+	checkPlayerDie();
+
 
 }
 
@@ -480,13 +496,18 @@ function drawTrees()
 		ellipse(trees_x[i] + 22, treePos_y - 129, 80, 90); 
 		ellipse(trees_x[i] + 2, treePos_y - 127, 80, 60);
 		}
+		
 
 }
 
 function drawCollectable(t_collectable)
 {
 	
-
+	// fill(255,255,0); // Set text color to white
+    // textSize(32); // Set text size
+    // text('Score: ' + score, gameChar_x, 50); 
+	// console.log("gamescore" , score)
+	
 
 	if(t_collectable.isFound == false){
 		fill(255,223,0);
@@ -499,6 +520,8 @@ function drawCollectable(t_collectable)
 		noFill(); 
 		ellipse(t_collectable.x_pos, t_collectable.y_pos, t_collectable.size, 40);};
 		noStroke();
+		
+		
 }
 
 function checkCollectable(t_collectable)
@@ -506,6 +529,10 @@ function checkCollectable(t_collectable)
 	if(dist(gameChar_x, gameChar_y, t_collectable.x_pos,t_collectable.y_pos) < 60)
 	{
 		t_collectable.isFound = true
+		game_score += 1;
+		
+			
+		
 	}
 }
 
@@ -532,22 +559,6 @@ function drawCanyon(t_canyon){
 
 }
 
-// function checkCanyon(t_canyon)
-// {
-// 	isPlummeting = false;
-// 	console.log("checking canyon at position" ,t_canyon.x_pos, "with width", t_canyon.width)
-// 	if(gameChar_x > canyons.x_pos && gameChar_x < t_canyons.x_pos + t_canyons.width)
-// 	{	
-
-// 		isPlummeting = true
-// 		console.log("Character is above this canyon.");
-
-// 	}
-// 	else
-// 	{
-// 		isPlummeting = false
-// 	}
-// }
 
 function checkCanyon(t_canyon) {
     let foundCanyon = false;  
@@ -560,4 +571,60 @@ function checkCanyon(t_canyon) {
     }
 
     isPlummeting = foundCanyon;  
+}
+
+function showScore(game_score)
+{
+	fill(255,255,0); // Set text color to white
+    textSize(32); // Set text size
+    text('Score: ' + game_score, gameChar_x, 30);
+
+
+	fill(255,255,0); // Set text color to white
+    textSize(32); // Set text size
+    text('Lives: ' + lives, gameChar_x - 200, 30);
+}
+
+
+
+
+function renderFlagpole()
+{
+	push();
+	strokeWeight(5);
+	stroke(200);
+	line(flagpole.x_pos, floorPos_y, flagpole.x_pos, floorPos_y - 250);
+	noStroke();
+	fill(255,0,0);
+	if(flagpole.isReached)
+	{
+	rect(flagpole.x_pos, floorPos_y - 250, 80, 50);
+	}
+	else
+	{
+		rect(flagpole.x_pos, floorPos_y -50, 80, 50)
+	}
+	pop();
+}
+
+function checkFlagpole()
+{
+
+	var d = abs(gameChar_x - flagpole.x_pos);
+
+	if(d < 15)
+	{
+		flagpole.isReached = true;
+	}
+
+	console.log(d);
+}
+
+function checkPlayerDie()
+{
+	if(gameChar_y == floorPos_y + 100)
+	{
+		// lives -= 1;
+		// helloo
+	}
 }
