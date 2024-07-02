@@ -1,12 +1,3 @@
-/*
-
-The Game Project
-
-Week 3
-
-Game interaction
-
-*/
 
 
 var gameChar_x;
@@ -17,13 +8,13 @@ var isRight;
 var isFalling;
 var isPlummeting;
 var isJumping;
-var collectable;
 var collectables;
-var canyon;
-// var treePos_x;
 var treePos_y;
 var mountain;
 var cameraPosX = 0;
+var numCollectables = 15
+var canyons;
+
 
 
 function setup()
@@ -41,19 +32,27 @@ function setup()
 	isFalling = false;
 	isJumping = false;
 
-	collectables = [{x_pos: 80, y_pos:420, size: 40, isFound: false},
-		{x_pos: 820, y_pos:420, size: 40, isFound: false},
-		{x_pos: 400, y_pos:420, size: 40, isFound: false},
-		{x_pos: 1000, y_pos:320, size: 40, isFound: false},
-		{x_pos: -480, y_pos:420, size: 40, isFound: false
-	}]
+	collectables = []
+	for (var i = 0; i < numCollectables; i ++)
+	{
+		collectables.push({
+			x_pos: random(0, width*5),
+			y_pos: random(320,420),
+			size: 40,
+			isFound: false
+		});
+	}
 
-	t_collectable = {x_pos: 80, y_pos:420, size: 40, isFound: false};
 
 	isPlummeting = false;
 
-	canyon = {x_pos: 150, width: 120};
 
+	canyons =[{x_pos: -650, width: 120},
+		{x_pos: -350, width: 120},
+		{x_pos: 150, width: 120},
+		{x_pos: 950, width: 150},
+		{x_pos: 1750, width: 150}
+		]
 	trees_x = [-200,300,500,900,1150,1400,1700];
 	treePos_y = height/2;
 	clouds_x = [-500,0,600,900,1300,1500]
@@ -67,8 +66,6 @@ function setup()
 
 function draw()
 {
-
-	// From what I recall, I've wrote all the code aside from the basic code that was already written like the background and the ground. 
 
 	cameraPosX = gameChar_x - width / 2;
 
@@ -96,10 +93,17 @@ function draw()
 	drawClouds()
 
 	//draw the canyon
+	checkCanyon(canyons);
 
-	drawCanyon(canyon)
+	for (var i = 0; i < canyons.length; i++)
+	{
+		// var canyon = canyons[i];
 
-	checkCanyon(canyon)
+		drawCanyon(canyons[i])
+
+		checkCanyon(canyons[i])
+		
+	}
 
 
 	for (var i = 0; i < collectables.length; i++) {
@@ -237,10 +241,11 @@ function draw()
 		fill(255,220,177);
 		ellipse(gameChar_x, gameChar_y - 60, 25);
 		// body
-		fill(20,255,20);
+		// fill(20,155,20);
+		fill(255,0,0);
 		rect(gameChar_x - 5, gameChar_y - 50, 10, 25);
 		// arms
-		stroke(20,255,20);
+		stroke(255,0,0);
 		strokeWeight(5);
 		// right
 		line(gameChar_x + 5, gameChar_y - 45, gameChar_x + 15, gameChar_y - 57);
@@ -327,12 +332,29 @@ function draw()
 
 
 	if (isPlummeting)
-	{
-		if(gameChar_y <= height && !isJumping)
-		{
+	{ 
+		if(gameChar_y >= floorPos_y && !isJumping)
+		{	isLeft = false
+			isRight = false
 			gameChar_y += 10;
+			if (gameChar_y > height - 10)
+			{
+				// gameChar_y = height + 10
+				fill(255,0,0);
+				textSize(60);
+				text("You're Dead!", gameChar_x , height/2)
+				gameChar_y = height + 10
+			}
 		}
 	}
+
+	// if (isPlummeting)
+	// {
+	// 	if(gameChar_y <= height && !isJumping)
+	// 	{
+	// 		gameChar_y += 20;
+	// 	}
+	// }
 
 	pop();
 
@@ -367,14 +389,14 @@ function keyPressed()
 	if (keyCode == 37)
 	{
 		isLeft = true;
-		// gameChar_x -= 10;
+		
 	}
 
 	// move right
 	else if (keyCode == 39)
 	{
 		isRight = true; 
-		// gameChar_x += 10;
+		
 	}
 
 	// jump
@@ -404,13 +426,7 @@ function keyReleased()
 		isRight = false; 
 	}
 
-	// else if (keyCode == 87)
-	// {
-	// 	gameChar_y += 100;
-	// }
-
-
-	// floorPos_y = height * 3/4;
+	
 
 }
 function drawClouds()
@@ -425,8 +441,7 @@ function drawClouds()
 		ellipse(clouds_x[i] + 20, clouds_y[i] + 5, 70, 70);
 
 
-		// ellipse(cloudPos_x + 40,cloudPos_y,100,70);
-		// ellipse(cloudPos_x + 50,cloudPos_y ,70,90);
+	
 	}
 }
 
@@ -470,10 +485,7 @@ function drawTrees()
 
 function drawCollectable(t_collectable)
 {
-	// if(dist(gameChar_x, gameChar_y, t_collectable.x_pos,t_collectable.y_pos) < 20)
-	// {
-	// 	t_collectable.isFound = true
-	// }
+	
 
 
 	if(t_collectable.isFound == false){
@@ -491,55 +503,61 @@ function drawCollectable(t_collectable)
 
 function checkCollectable(t_collectable)
 {
-	if(dist(gameChar_x, gameChar_y, t_collectable.x_pos,t_collectable.y_pos) < 20)
+	if(dist(gameChar_x, gameChar_y, t_collectable.x_pos,t_collectable.y_pos) < 60)
 	{
 		t_collectable.isFound = true
 	}
 }
 
-function drawCanyon(canyon){
+function drawCanyon(t_canyon){
 	// Draw the main body of the canyon
 	fill(100, 155, 255);
-	rect(canyon.x_pos, 432, canyon.width, 150);
+	rect(t_canyon.x_pos, 432, t_canyon.width, 150);
 
 	// Draw the lighter vertical sections on the sides of the canyon
 	fill(250, 182, 126);
-	rect(canyon.x_pos, 432, 10, 150); // Left small vertical rect
-	rect(canyon.x_pos + canyon.width - 10, 432, 10, 150); // Right small vertical rect
+	rect(t_canyon.x_pos, 432, 10, 150); // Left small vertical rect
+	rect(t_canyon.x_pos + t_canyon.width - 10, 432, 10, 150); // Right small vertical rect
 
 	// Additional features of the canyon
 	fill(250, 182, 126);
-	rect(canyon.x_pos, 492, 28, 150); 
+	rect(t_canyon.x_pos, 492, 28, 150); 
 
 	// Darkened sides with triangles and rectangles for depth effect
 	
 	fill(240, 172, 126);
-	triangle(canyon.x_pos, 432, canyon.x_pos, 574, canyon.x_pos + 50, 578); 
-	rect(canyon.x_pos + canyon.width - 20, 492, 20, 180); 
-	triangle(canyon.x_pos + canyon.width, 432, canyon.x_pos + canyon.width, 574, canyon.x_pos + canyon.width - 30, 578);
-
-	// if(gameChar_x > canyon.x_pos && gameChar_x < canyon.x_pos + canyon.width)
-	// {
-	// 	isPlummeting = true
-	// }
-	// else
-	// {
-	// 	isPlummeting = false
-	// }
-
+	triangle(t_canyon.x_pos, 432, t_canyon.x_pos, 574, t_canyon.x_pos + 50, 578); 
+	rect(t_canyon.x_pos + t_canyon.width - 20, 492, 20, 180); 
+	triangle(t_canyon.x_pos + t_canyon.width, 432, t_canyon.x_pos + t_canyon.width, 574, t_canyon.x_pos + t_canyon.width - 30, 578);
 
 }
 
-function checkCanyon(canyon)
-{
+// function checkCanyon(t_canyon)
+// {
+// 	isPlummeting = false;
+// 	console.log("checking canyon at position" ,t_canyon.x_pos, "with width", t_canyon.width)
+// 	if(gameChar_x > canyons.x_pos && gameChar_x < t_canyons.x_pos + t_canyons.width)
+// 	{	
 
-	if(gameChar_x > canyon.x_pos && gameChar_x < canyon.x_pos + canyon.width)
-	{
-		isPlummeting = true
-	}
-	else
-	{
-		isPlummeting = false
-	}
+// 		isPlummeting = true
+// 		console.log("Character is above this canyon.");
+
+// 	}
+// 	else
+// 	{
+// 		isPlummeting = false
+// 	}
+// }
+
+function checkCanyon(t_canyon) {
+    let foundCanyon = false;  
+
+    for (var i = 0; i < canyons.length; i++) {
+        if (gameChar_x > canyons[i].x_pos && gameChar_x < canyons[i].x_pos + canyons[i].width) {
+            foundCanyon = true;
+            break;  
+        }
+    }
+
+    isPlummeting = foundCanyon;  
 }
-
